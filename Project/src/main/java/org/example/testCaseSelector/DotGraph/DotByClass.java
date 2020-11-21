@@ -11,9 +11,9 @@ import java.util.Iterator;
 
 public class DotByClass implements DotGenerator {
     private CallGraph callGraph = Analysis.getCallGraph();
-    // 调用图顶点
+    // 顶点
     private ArrayList<String> vertexList = new ArrayList<>();
-    // 调用图邻接表
+    // 邻接表
     private ArrayList<ArrayList<Integer>> adjacentList = new ArrayList<>();
 
     @Override
@@ -26,22 +26,20 @@ public class DotByClass implements DotGenerator {
         return adjacentList;
     }
 
-
-    //生成类的调用者的dot图
+    //生成调用图
     public void generateDot() {
         extractGraph();
 
         String projectName = Analysis.getProjectName();
-        String dotContent = toDot(projectName,vertexList,adjacentList);
+        String dotContent = toDot(projectName, vertexList, adjacentList);
         FileWriter.writeFile("class-" + projectName + ".dot", dotContent);
     }
 
     private void extractGraph() {
-        // 获取所有顶点
+        //获取邻接表
         for (CGNode node : callGraph) {
             if (node.getMethod() instanceof ShrikeBTMethod) {
                 ShrikeBTMethod method = (ShrikeBTMethod) node.getMethod();
-                // 使用Primordial类加载器加载的类都属于Java原生类，一般不关心
                 if ("Application".equals(method.getDeclaringClass().getClassLoader().toString())) {
                     String classInnerName = method.getDeclaringClass().getName().toString();
                     String signature = method.getSignature();
@@ -52,11 +50,10 @@ public class DotByClass implements DotGenerator {
                 }
             }
         }
-        // 获取类调用图邻接表
+        //获取顶点
         for (CGNode node : callGraph) {
             if (node.getMethod() instanceof ShrikeBTMethod) {
                 ShrikeBTMethod method = (ShrikeBTMethod) node.getMethod();
-                // 使用Primordial类加载器加载的类都属于Java原生类，一般不关心
                 if ("Application".equals(method.getDeclaringClass().getClassLoader().toString())) {
                     String calleeInnerName = method.getDeclaringClass().getName().toString();
                     int calleeIndex = vertexList.indexOf(calleeInnerName);
@@ -80,11 +77,10 @@ public class DotByClass implements DotGenerator {
         }
     }
 
-    private String toDot(String projectName, ArrayList<String> vertexList, ArrayList<ArrayList<Integer>> adjacentList){
+    private String toDot(String projectName, ArrayList<String> vertexList, ArrayList<ArrayList<Integer>> adjacentList) {
         String dotContent = "digraph " + projectName + " {\n";
         for (int calleeIndex = 0; calleeIndex < vertexList.size(); calleeIndex++) {
             String callee = vertexList.get(calleeIndex);
-            // 如果没有调用者
             if (adjacentList.get(calleeIndex).isEmpty())
                 continue;
             for (int callerIndex : adjacentList.get(calleeIndex)) {

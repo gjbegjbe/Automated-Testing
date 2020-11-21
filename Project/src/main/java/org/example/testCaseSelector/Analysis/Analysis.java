@@ -49,10 +49,7 @@ public class Analysis {
 
     private static String[] targetPath;
 
-
-
-
-    // test类和其@Test方法
+    //测试类和测试方法
     private static HashMap<String, HashSet<String>> testMethodsOfTestClasses = new HashMap<>();
 
     public static CallGraph getCallGraph() {
@@ -75,23 +72,19 @@ public class Analysis {
         this.args = args;
     }
 
-    /*
-            生成0-CFA调用图
-            获取变更信息
-            获取测试类和其@Test方法
-            */
+
+    //生成调用图、获取变更信息、测试类和方法
     public void analyze() throws IOException, InvalidClassFileException, ClassHierarchyException, CancelException {
         projectTarget = args[1];
         changeInfo = args[2];
         targetPath = args[1].split("\\\\");
 
         try {
-            projectName = targetPath[targetPath.length - 2].split("-")[1];//判断路径是否合法
+            projectName = targetPath[targetPath.length - 2].split("-")[1];
         } catch (Exception e) {
         }
         if (!projectTarget.endsWith(File.separator))
             projectTarget += File.separator;
-
 
 
         // 读取变更信息
@@ -140,11 +133,10 @@ public class Analysis {
         builder = Util.makeZeroCFABuilder(
                 Language.JAVA, option, new AnalysisCacheImpl(), classHierarchy, analysisScope);
         callGraph = builder.makeCallGraph(option);
-        // 遍历cg中所有的节点，获取测试类名和测试类的@Test方法
+        // 获取测试类名和测试方法
         for (CGNode node : callGraph) {
             if (node.getMethod() instanceof ShrikeBTMethod) {
                 ShrikeBTMethod method = (ShrikeBTMethod) node.getMethod();
-                // 使用Primordial类加载器加载的类都属于Java原生类，一般不关心
                 if ("Application".equals(method.getDeclaringClass().getClassLoader().toString())) {
                     String classInnerName = method.getDeclaringClass().getName().toString();
                     String signature = method.getSignature();
@@ -152,7 +144,6 @@ public class Analysis {
                     if (!testMethodsOfTestClasses.containsKey(classInnerName)) {
                         testMethodsOfTestClasses.put(classInnerName, new HashSet<>());
                     }
-                    // 如果是junit的@Test方法
                     Collection<Annotation> annotations = method.getAnnotations();
                     for (Annotation annotation : annotations) {
                         if (annotation.toString().contains("Lorg/junit/Test")) {
@@ -163,7 +154,6 @@ public class Analysis {
                 }
             }
         }
-
 
 
     }

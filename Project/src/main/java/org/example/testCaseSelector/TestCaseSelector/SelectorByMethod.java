@@ -13,7 +13,7 @@ public class SelectorByMethod implements TestCaseSelector {
     private DotGenerator dotGenerator = new DotByMethod();
     private HashSet<String> selectedTests = new HashSet<>();
     private HashSet<String> changes = Analysis.getChanges();
-    // 测试类和其@Test方法
+    // 测试类和测试方法
     private HashMap<String,HashSet<String>> testMethodsOfTestClasses = Analysis.getTestMethodsOfTestClasses();
     // 调用图顶点
     private ArrayList<String> vertexList;

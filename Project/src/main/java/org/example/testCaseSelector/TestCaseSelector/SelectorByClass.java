@@ -13,8 +13,8 @@ public class SelectorByClass implements TestCaseSelector {
     private DotGenerator dotGenerator = new DotByClass();
     private HashSet<String> selectedTests = new HashSet<>();
     private HashSet<String> changes = Analysis.getChanges();
-    // 测试类和其@Test方法
-    private HashMap<String,HashSet<String>> testMethodsOfTestClasses = Analysis.getTestMethodsOfTestClasses();
+    // 测试类和方法
+    private HashMap<String, HashSet<String>> testMethodsOfTestClasses = Analysis.getTestMethodsOfTestClasses();
     // 调用图顶点
     private ArrayList<String> vertexList;
     // 调用图邻接表
@@ -22,7 +22,6 @@ public class SelectorByClass implements TestCaseSelector {
 
     public void select() {
         before();
-
         // 寻找更改的类
         HashSet<String> changedClasses = new HashSet<>();
         for (String change : changes) {
@@ -37,13 +36,13 @@ public class SelectorByClass implements TestCaseSelector {
         writeFile();
     }
 
-    private void before(){
+    private void before() {
         dotGenerator.generateDot();
         vertexList = dotGenerator.getVertexList();
         adjacentList = dotGenerator.getAdjacentList();
     }
 
-    private void writeFile(){
+    private void writeFile() {
         String content = "";
         for (String test : selectedTests) {
             content += test + '\n';
@@ -52,16 +51,17 @@ public class SelectorByClass implements TestCaseSelector {
     }
 
 
+    //深度优先搜索
     private void dfs(HashSet<Integer> visited, int curIndex) {
         if (visited.contains(curIndex))
             return;
         visited.add(curIndex);
         for (int callerIndex : adjacentList.get(curIndex)) {
             String caller = vertexList.get(callerIndex);
-            if (testMethodsOfTestClasses.containsKey(caller)){
+            if (testMethodsOfTestClasses.containsKey(caller)) {
                 HashSet<String> methods = testMethodsOfTestClasses.get(caller);
-                for(String method:methods){
-                    selectedTests.add(caller+' '+method);
+                for (String method : methods) {
+                    selectedTests.add(caller + ' ' + method);
                 }
             }
             dfs(visited, callerIndex);
